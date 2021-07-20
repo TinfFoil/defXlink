@@ -1,17 +1,57 @@
-#import libraries
-
 from bs4 import BeautifulSoup
 import requests
 import re
 
-# create dict with sections:n-pages as key:value pairs, iterate over them as many times as the value and append each page with the links to the dishes to pages_lst
+# create dict with sections:n-pages as key:value pairs, iterate over them as
+# many times as the value and append each page with the links to the dishes to pages_lst
+
+# sections = {"https://www.giallozafferano.it/ricette-cat/": 383,
+#             "https://www.giallozafferano.it/ricette-cat/Antipasti/": 75,
+#             "https://www.giallozafferano.it/ricette-cat/Primi/": 86,
+#             "https://www.giallozafferano.it/ricette-cat/Secondi-piatti/": 66,
+#             "https://www.giallozafferano.it/ricette-cat/Contorni/": 19,
+#             "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/": 118,
+#             "https://www.giallozafferano.it/ricette-cat/Lievitati/": 25,
+#             "https://www.giallozafferano.it/ricette-cat/Piatti-Unici/": 30,
+#             "https://www.giallozafferano.it/ricette-cat/facili-e-veloci/": 74,
+#             "https://www.giallozafferano.it/ricette-cat/Primi/pasta/": 42,
+#             "https://www.giallozafferano.it/ricette-cat/Antipasti/facili-e-veloci/": 19,
+#             "https://www.giallozafferano.it/ricette-cat/Lievitati/Pizze-e-focacce/": 10,
+#             "https://www.giallozafferano.it/ricette-cat/Lievitati/pane/": 9,
+#             "https://www.giallozafferano.it/ricette-cat/Finger-food/": 45,
+#             "https://www.giallozafferano.it/ricette-cat/Torte-salate/": 11,
+#             "https://www.giallozafferano.it/ricette-cat/Al-forno/": 141,
+#             "https://www.giallozafferano.it/ricette-cat/Insalate/": 6,
+#             "https://www.giallozafferano.it/ricette-cat/Primi/Pasta-fresca/": 14,
+#             "https://www.giallozafferano.it/ricette-cat/Primi/facili-e-veloci/": 20,
+#             "https://www.giallozafferano.it/ricette-cat/Primi/pasta/grandi-classici/": 7,
+#             "https://www.giallozafferano.it/ricette-cat/Primi/pasta/Sfiziosi/": 30,
+#             "https://www.giallozafferano.it/ricette-cat/Primi/Gnocchi/": 7,
+#             "https://www.giallozafferano.it/ricette-cat/Primi/riso-cereali/": 16,
+#             "https://www.giallozafferano.it/ricette-cat/Secondi-piatti/Pesce/": 22,
+#             "https://www.giallozafferano.it/ricette-cat/Secondi-piatti/Vegetariani/": 12,
+#             "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/Biscotti/": 13,
+#             "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/piccola-pasticceria/": 37,
+#             "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/facili-e-veloci/": 18,
+#             "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/Torte/": 43,
+#             "https://www.giallozafferano.it/ricette-cat/al-cioccolato/": 30,
+#             "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/Torte/facili-e-veloci/": 5,
+#             "https://www.giallozafferano.it/ricette-cat/Marmellate-e-Conserve/Marmellate/": 4,
+#             "https://www.giallozafferano.it/ricette-cat/Carne/": 43,
+#             "https://www.giallozafferano.it/ricette-cat/Pesce/": 55,
+#             "https://www.giallozafferano.it/ricette-cat/Vegetariani/": 203
+#         }
+
+sections = {"https://www.giallozafferano.it/ricette-cat/": 2}
+
 pages_lst = []
-sections = {"https://www.giallozafferano.it/ricette-cat/":383, "https://www.giallozafferano.it/ricette-cat/Antipasti/":75, "https://www.giallozafferano.it/ricette-cat/Primi/":86, "https://www.giallozafferano.it/ricette-cat/Secondi-piatti/":66, "https://www.giallozafferano.it/ricette-cat/Contorni/":19, "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/":118, "https://www.giallozafferano.it/ricette-cat/Lievitati/":25, "https://www.giallozafferano.it/ricette-cat/Piatti-Unici/":30, "https://www.giallozafferano.it/ricette-cat/facili-e-veloci/":74, "https://www.giallozafferano.it/ricette-cat/Primi/pasta/":42, "https://www.giallozafferano.it/ricette-cat/Antipasti/facili-e-veloci/":19, "https://www.giallozafferano.it/ricette-cat/Lievitati/Pizze-e-focacce/":10, "https://www.giallozafferano.it/ricette-cat/Lievitati/pane/":9, "https://www.giallozafferano.it/ricette-cat/Finger-food/":45, "https://www.giallozafferano.it/ricette-cat/Torte-salate/":11, "https://www.giallozafferano.it/ricette-cat/Al-forno/":141, "https://www.giallozafferano.it/ricette-cat/Insalate/":6, "https://www.giallozafferano.it/ricette-cat/Primi/Pasta-fresca/":14, "https://www.giallozafferano.it/ricette-cat/Primi/facili-e-veloci/":20, "https://www.giallozafferano.it/ricette-cat/Primi/pasta/grandi-classici/":7, "https://www.giallozafferano.it/ricette-cat/Primi/pasta/Sfiziosi/":30, "https://www.giallozafferano.it/ricette-cat/Primi/Gnocchi/":7, "https://www.giallozafferano.it/ricette-cat/Primi/riso-cereali/":16, "https://www.giallozafferano.it/ricette-cat/Secondi-piatti/Pesce/":22, "https://www.giallozafferano.it/ricette-cat/Secondi-piatti/Vegetariani/":12, "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/Biscotti/":13, "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/piccola-pasticceria/":37, "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/facili-e-veloci/":18, "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/Torte/":43, "https://www.giallozafferano.it/ricette-cat/al-cioccolato/":30, "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/Torte/facili-e-veloci/":5, "https://www.giallozafferano.it/ricette-cat/Marmellate-e-Conserve/Marmellate/":4, "https://www.giallozafferano.it/ricette-cat/Carne/":43, "https://www.giallozafferano.it/ricette-cat/Pesce/":55, "https://www.giallozafferano.it/ricette-cat/Vegetariani/":203}
 for section in sections:
     for i in range(1, sections[section]):
-      pages = section+"page"+str(i)
-      pages_lst.append(pages)
-#print(pages_lst)
+      page = "".join([section, "page", str(i)])
+      pages_lst.append(page)
+# print(pages_lst)
+print("Number of section URLs produced:",  len(pages_lst))
+
 
 # for each page, get the section enclosed in the tag h2, class and in that get a, href and append it to dishes_lst
 dishes_lst = []
@@ -22,8 +62,11 @@ for url in pages_lst:
     for dish in dishes:
         a_tag = dish.find("a")
         dishes_lst.append(a_tag.get("href"))
-#print(dishes_lst)
+print(dishes_lst)
+print("Number of dishes identified:",  len(dishes_lst))
 
+
+exit()
 # get title string for every dish and delete unnecessary strings
 title_lst = []
 
