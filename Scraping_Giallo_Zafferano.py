@@ -78,7 +78,7 @@ def getPresentation(soup):
 
   # concatenate the two lists element-wise in one title_presentation_lst
   title_presentation_lst = [header + txt for header, txt in zip(uppertitle_lst, presentation_lst)]
-  return title_presentation_lst
+  return "\n".join(title_presentation_lst)
 
 def getTitle(soup):
   """
