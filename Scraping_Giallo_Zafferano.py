@@ -48,11 +48,28 @@ def getIngredients(soup):
   """
   Get the necessary ingredients for the recipe
   :param soup:
+        BeautifulSoup object
   :return:
-
+        list of ingredients with header INGREDIENTI\n
+        for each recipe
   """
-  # TODO
-  return ""
+  ingredients_lst = []
+  ingredient_tag = soup.find_all("dd", class_="gz-ingredient")
+  # on-the-fly list to append cleaned ingredients
+  full_ingredients = []
+  for t in ingredient_tag:
+      ingredient = t.get_text().strip()
+      ingredient = re.sub(r"([^\n\t]+)\s+([^\n\t]*)\s+([^\n\t]*[;:,\.!\?\\\-\%\(\)]*)\s+([^\n\t]*)", r"\1 \2\3\t\4",
+                          ingredient)
+      ingredient = re.sub(r"([0-9½;,:\.!\?\\\-\%]+)\t([^\n\t]*)", r"\t\1 \2", ingredient)
+      ingredient = ingredient.replace(" \t", "\t")
+      full_ingredients.append(ingredient)
+  # append ingredients joined together to have an element with the ingredients for every recipe
+  ingredients_lst.append("\n".join(full_ingredients))
+  titolo = "INGREDIENTI\n"
+  titolo += '{0}'
+  ingredients_lst = [titolo.format(i) for i in ingredients_lst]
+  return "\n".join(ingredients_lst)
 
 def getPresentation(soup):
   """
