@@ -7,23 +7,26 @@ sections = {"https://www.giallozafferano.it/ricette-cat/": 2}
 
 def getContents(soup):
   """
-  Get the contents of the recipe. Delete span tag, get paragraphs of html
+  Get the contents of the recipe, get paragraphs of html
   where recipe is explained, clean them from unwanted whitespaces, turn them
-  into strings and join them
+  into strings and join them. Add square brackets to numbered steps 
+  and unwrap them from span tag. 
   :param soup:
       beautifulsoup object
   :return:
       string with the contents of the recipe
   """
-  for span in soup("span"):
-     span.decompose()
-  content = soup.find_all("div", class_="gz-content-recipe-step")
+  contents = soup.find_all("div", class_="gz-content-recipe-step")
+  for content in contents:
+      for tag in content.find_all("span"):
+          tag.string = re.sub(r"([0-9]+)", r"[\1]", tag.string)
+          content.span.unwrap()
   full_text = []
-  for step in content:
-     p_tag = step.find("p")
-     paragraph = re.sub(r"\s+", r" ", p_tag.get_text())
-     paragraph = re.sub(r"\s([;:\.!\?\\-])", r"\1", paragraph)
-     full_text.append(paragraph)
+  for step in contents:
+      p_tag = step.find("p")
+      paragraph = re.sub(r"\s+", r" ", p_tag.get_text())
+      paragraph = re.sub(r"\s([;:\.!\?\\-])", r"\1", paragraph)
+      full_text.append(paragraph)
   return re.sub(r"([;:\.!\?\\-])(\S)", r"\1 \2", "".join(full_text))
 
 
