@@ -17,10 +17,12 @@ def getContents(soup):
       string with the contents of the recipe
   """
   contents = soup.find_all("div", class_="gz-content-recipe-step")
+  # enclose string of span tag in square brackets and unwrap it from the span tag
   for content in contents:
       for tag in content.find_all("span"):
           tag.string = re.sub(r"([0-9]+)", r"[\1]", tag.string)
           content.span.unwrap()
+  # create a list on-the-fly, append cleaned paragraphs and join them to have an element for each recipe
   full_text = []
   for step in contents:
       p_tag = step.find("p")
@@ -54,7 +56,7 @@ def getIngredients(soup):
 
 def getPresentation(soup):
   """
-  Get the header PRESENTATION and paragraph with the presentation of the recipe
+  Get the header PRESENTAZIONE and paragraph with the presentation of the recipe
   :param soup:
             beautifulsoup object
   :return:
@@ -66,7 +68,7 @@ def getPresentation(soup):
 
   # iterate over dict and find the tag with uppercase title and content
   presentation_tag = soup.find_all("div", class_="gz-innerwrapper gz-contentwrapper gz-fullbg gz-cabin-elevator-container")
-  # get title PRESENTATION, add \n at the end to separate it from the text in the final list and append it in uppertitle_lst
+  # get title PRESENTAZIONE, add \n at the end to separate it from the text in the final list and append it in uppertitle_lst
   for tag in presentation_tag:
       uppertitle = tag.find("h2")
       uppercase_title = re.sub("PRESENTAZIONE", "PRESENTAZIONE\n", uppertitle.text)
