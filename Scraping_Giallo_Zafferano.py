@@ -35,11 +35,14 @@ def getContents(soup):
       paragraph = re.sub(r"\s+", r" ", p_tag.get_text())
       paragraph = re.sub(r"\s([;:\.!\?\\-])", r"\1", paragraph)
       full_text.append(paragraph)
-  contents_lst.append(re.sub(r"([;:\.!\?\\-])(\S)", r"\1 \2", "".join(full_text)))
-  titolo = "PREPARAZIONE\n"
-  titolo += '{0}'
-  contents_lst = [titolo.format(i) for i in contents_lst]
-  return "\n".join(contents_lst)
+  print(full_text)
+  return "\n".join(full_text)
+  # exit(0)
+  # contents_lst.append(re.sub(r"([;:\.!\?\\-])(\S)", r"\1 \2", "".join(full_text)))
+  # titolo = "PREPARAZIONE\n"
+  # titolo += '{0}'
+  # contents_lst = [titolo.format(i) for i in contents_lst]
+  # return "\n".join(contents_lst)
 
 
 def getFileName(title):
@@ -94,7 +97,6 @@ def get_ingredients(soup):
       ingredient = ingredient.replace(" \t", "\t")
       full_ingredients.append(ingredient)
   # append ingredients joined together to have an element with the ingredients for every recipe
-  print(full_ingredients)
   return "\n".join(full_ingredients)
   # exit(0)
   # ingredients_lst.append("\n".join(full_ingredients))
@@ -220,4 +222,4 @@ for link in dishes_lst:
   #       ])
 
   # print(recipeContents)
-  exit()
+  # exit()
