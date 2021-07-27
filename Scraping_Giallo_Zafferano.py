@@ -1,6 +1,11 @@
 from bs4 import BeautifulSoup
+
+import os
+import random
 import requests
 import re
+import time
+
 
 sections = {"https://www.giallozafferano.it/ricette-cat/": 2}
 
@@ -49,7 +54,26 @@ def getFileName(title):
   return f
 
 
-def getIngredients(soup):
+def get_folder_name(counter, path="."):
+  """
+  Produces the path to the desired folder, departing from path.
+  Creates the emtpy folder (warns if it already exists)
+  :param counter:
+    number to differentiate the folders
+  :param path:
+    optional departing path (current folder if empty)
+  :return:
+    the path to the resulting folder
+  """
+  folder = os.path.join(path, "gf_it_"+str(counter).zfill(4))
+  if os.path.isdir(folder):
+    print("Warning, the folder exists", folder)
+  else:
+    os.mkdir(folder)
+  return folder
+
+
+def get_ingredients(soup):
   """
   Get the necessary ingredients for the recipe
   :param soup:
@@ -61,7 +85,7 @@ def getIngredients(soup):
   ingredients_lst = []
   ingredient_tag = soup.find_all("dd", class_="gz-ingredient")
   # on-the-fly list to append cleaned ingredients
-  full_ingredients = []
+  full_ingredients = ["ingredient\tquantity"]
   for t in ingredient_tag:
       ingredient = t.get_text().strip()
       ingredient = re.sub(r"([^\n\t]+)\s+([^\n\t]*)\s+([^\n\t]*[;:,\.!\?\\\-\%\(\)]*)\s+([^\n\t]*)", r"\1 \2\3\t\4",
@@ -70,11 +94,15 @@ def getIngredients(soup):
       ingredient = ingredient.replace(" \t", "\t")
       full_ingredients.append(ingredient)
   # append ingredients joined together to have an element with the ingredients for every recipe
-  ingredients_lst.append("\n".join(full_ingredients))
-  titolo = "INGREDIENTI\n"
-  titolo += '{0}'
-  ingredients_lst = [titolo.format(i) for i in ingredients_lst]
-  return "\n".join(ingredients_lst)
+  print(full_ingredients)
+  return "\n".join(full_ingredients)
+  # exit(0)
+  # ingredients_lst.append("\n".join(full_ingredients))
+  # titolo = "INGREDIENTI\n"
+  # titolo += '{0}'
+  # ingredients_lst = [titolo.format(i) for i in ingredients_lst]
+  # return "\n".join(ingredients_lst)
+
 
 def getPresentation(soup):
   """
@@ -140,6 +168,8 @@ for url in pages_lst:
 print(dishes_lst)
 print("Number of dishes found:", len(dishes_lst))
 
+
+counter = 0
 for link in dishes_lst:
   # getting the recipe contents from the website
   get_url = requests.get(link)
@@ -148,17 +178,46 @@ for link in dishes_lst:
   # getting the title, presentation, ingredients and contents
   recipeTitle = getTitle(link_soup)
   recipePresentation = getPresentation(link_soup)
-  recipeIngredients = getIngredients(link_soup)
+  recipeIngredients = get_ingredients(link_soup)
   recipeContents = getContents(link_soup)
 
-  file_name = getFileName(recipeTitle)
-  with open(file_name, "w") as f:
-    f.writelines([
-        recipeTitle, "\n",
-        recipePresentation, "\n",
-        recipeIngredients, "\n",
-        recipeContents
-        ])
+  folder = get_folder_name(counter)
+  counter += 1
+  # fileTitle = os.path.join(folder, ".".join([recipeTitle.replace(" ", "_").replace("'", ""), "txt"]))
+  # title file
+
   print("Storing recipe", recipeTitle)
+  fileTitle = os.path.join(folder, "title.txt")
+  with open(fileTitle, "w") as f:
+    f.write(recipeTitle)
+
+  # presentation file
+  filePres = os.path.join(folder, "presentation.txt")
+  with open(filePres, "w") as f:
+    f.write(recipePresentation)
+
+  # ingredients file
+  fileIngredients = os.path.join(folder, "ingredients.txt")
+  with open(fileIngredients, "w") as f:
+    f.write(recipeIngredients)
+
+  # preparation file
+  filePreparation = os.path.join(folder, "preparation.txt")
+  with open(filePreparation, "w") as f:
+    f.write(recipeContents)
+
+
+  # sleep the process for a random time in [0, 5] secs to avoid overleading
+  # the server
+  time.sleep(random.randrange(0, 5))
+  # file_name = getFileName(recipeTitle, counter)
+  # with open(file_name, "w") as f:
+  #   f.writelines([
+  #       recipeTitle, "\n",
+  #       recipePresentation, "\n",
+  #       recipeIngredients, "\n",
+  #       recipeContents
+  #       ])
+
   # print(recipeContents)
   exit()
