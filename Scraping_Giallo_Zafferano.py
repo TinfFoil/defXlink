@@ -16,6 +16,7 @@ def getContents(soup):
   :return:
       string with the contents of the recipe
   """
+  contents_lst = []
   contents = soup.find_all("div", class_="gz-content-recipe-step")
   # enclose string of span tag in square brackets and unwrap it from the span tag
   for content in contents:
@@ -29,7 +30,11 @@ def getContents(soup):
       paragraph = re.sub(r"\s+", r" ", p_tag.get_text())
       paragraph = re.sub(r"\s([;:\.!\?\\-])", r"\1", paragraph)
       full_text.append(paragraph)
-  return re.sub(r"([;:\.!\?\\-])(\S)", r"\1 \2", "".join(full_text))
+  content_lst.append(re.sub(r"([;:\.!\?\\-])(\S)", r"\1 \2", "".join(full_text)))
+  titolo = "PREPARAZIONE\n"
+  titolo += '{0}'
+  content_lst = [titolo.format(i) for i in content_lst]
+  return "\n".join(content_lst)
 
 
 def getFileName(title):
