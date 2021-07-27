@@ -44,17 +44,17 @@ def getContents(soup):
   # contents_lst = [titolo.format(i) for i in contents_lst]
   # return "\n".join(contents_lst)
 
-
-def getFileName(title):
-  """
-  Get title string for the current recipe
-  :param title:
-          string title of the recipe
-  :return:
-          the name of the file to store the recipe to
-  """
-  f = ".".join([title.replace(" ", "_").replace("'", ""), "txt"])
-  return f
+#
+# def getFileName(title):
+#   """
+#   Get title string for the current recipe
+#   :param title:
+#           string title of the recipe
+#   :return:
+#           the name of the file to store the recipe to
+#   """
+#   f = ".".join([title.replace(" ", "_").replace("'", ""), "txt"])
+#   return f
 
 
 def get_folder_name(counter, path="."):
@@ -132,10 +132,11 @@ def getPresentation(soup):
       content = text.find("p")
   presentation_lst.append(content.text)
   # print(presentation_lst)
-
+  # exit(1)
   # concatenate the two lists element-wise in one title_presentation_lst
   title_presentation_lst = [header + txt for header, txt in zip(uppertitle_lst, presentation_lst)]
   return "\n".join(title_presentation_lst)
+
 
 def getTitle(soup):
   """
@@ -149,6 +150,10 @@ def getTitle(soup):
   title = re.sub("Ricetta ", "", title).strip()
   return title
 
+
+####
+# main process
+###
 
 pages_lst = []
 for section in sections:
@@ -167,7 +172,7 @@ for url in pages_lst:
     for dish in dishes:
         a_tag = dish.find("a")
         dishes_lst.append(a_tag.get("href"))
-print(dishes_lst)
+# print(dishes_lst)
 print("Number of dishes found:", len(dishes_lst))
 
 
@@ -177,41 +182,44 @@ for link in dishes_lst:
   get_url = requests.get(link)
   link_soup = BeautifulSoup(get_url.content, "html.parser")
 
-  # getting the title, presentation, ingredients and contents
-  recipeTitle = getTitle(link_soup)
-  recipePresentation = getPresentation(link_soup)
-  recipeIngredients = get_ingredients(link_soup)
-  recipeContents = getContents(link_soup)
-
   folder = get_folder_name(counter)
   counter += 1
-  # fileTitle = os.path.join(folder, ".".join([recipeTitle.replace(" ", "_").replace("'", ""), "txt"]))
-  # title file
 
+  # getting the title, presentation, ingredients and contents
+
+  recipeTitle = getTitle(link_soup)
   print("Storing recipe", recipeTitle)
+  # title file
   fileTitle = os.path.join(folder, "title.txt")
   with open(fileTitle, "w") as f:
     f.write(recipeTitle)
 
   # presentation file
+  recipePresentation = getPresentation(link_soup)
   filePres = os.path.join(folder, "presentation.txt")
   with open(filePres, "w") as f:
     f.write(recipePresentation)
 
-  # ingredients file
+  # ingredients
+  recipeIngredients = get_ingredients(link_soup)
   fileIngredients = os.path.join(folder, "ingredients.txt")
   with open(fileIngredients, "w") as f:
     f.write(recipeIngredients)
 
-  # preparation file
+  # preparation
+  recipeContents = getContents(link_soup)
   filePreparation = os.path.join(folder, "preparation.txt")
   with open(filePreparation, "w") as f:
     f.write(recipeContents)
 
-
-  # sleep the process for a random time in [0, 5] secs to avoid overleading
-  # the server
+  # sleep for a random time in [0, 5] secs to avoid overleading the server
   time.sleep(random.randrange(0, 5))
+  # exit()
+
+
+  # fileTitle = os.path.join(folder, ".".join([recipeTitle.replace(" ", "_").replace("'", ""), "txt"]))
+
+
   # file_name = getFileName(recipeTitle, counter)
   # with open(file_name, "w") as f:
   #   f.writelines([
@@ -222,4 +230,3 @@ for link in dishes_lst:
   #       ])
 
   # print(recipeContents)
-  # exit()
