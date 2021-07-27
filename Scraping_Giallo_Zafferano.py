@@ -5,6 +5,7 @@ import random
 import requests
 import re
 import time
+import urllib.request
 
 
 sections = {"https://www.giallozafferano.it/ricette-cat/": 2}
@@ -105,6 +106,21 @@ def get_ingredients(soup):
   # ingredients_lst = [titolo.format(i) for i in ingredients_lst]
   # return "\n".join(ingredients_lst)
 
+
+def get_pictures(soup):
+  """
+  Looks for all the images illustrating the recipe steps
+  :param soup:
+  :return:
+    a list with the URLs to every picture
+  """
+  prefix = "https://ricette.giallozafferano.it"
+  tag = "picture"
+  cl = "gz-content-recipe-step-img gz-content-recipe-step-img-full"
+
+  imageTags = soup.find_all(tag, class_=cl)
+  paths = ["/".join([prefix, i.find('img')['data-src']]) for i in imageTags]
+  return paths
 
 def getPresentation(soup):
   """
@@ -211,6 +227,12 @@ for link in dishes_lst:
   filePreparation = os.path.join(folder, "preparation.txt")
   with open(filePreparation, "w") as f:
     f.write(recipeContents)
+
+  # pictures
+  recipePictures= get_pictures(link_soup)
+  for pict in recipePictures:
+    filePict = os.path.join(folder, pict[pict.rfind("/")+1:])
+    urllib.request.urlretrieve(pict, filePict)
 
   # sleep for a random time in [0, 5] secs to avoid overleading the server
   time.sleep(random.randrange(0, 5))
