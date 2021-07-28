@@ -57,6 +57,17 @@ class GialloZafferano():
             "https://www.giallozafferano.it/ricette-cat/Vegetariani/": 203
         }
 
+    # prefix for the folders that will contain each recipe
+    NEW_FOLDER_PREFIX = "gf_it_"
+
+    # Metadata to load the pictures for the recipe steps
+    PICTURE_PREFIX = "https://ricette.giallozafferano.it"
+    PICTURE_CLASSES = ["gz-content-recipe-step-img gz-content-recipe-step-img-full",
+               "gz-content-recipe-step-img gz-content-recipe-step-img-single"
+            ]
+    PICTURE_TAG = "picture"
+
+
     def __init__(self):
         None
 
@@ -71,7 +82,7 @@ class GialloZafferano():
         :return:
           the path to the resulting folder
         """
-        folder = os.path.join(path, "gf_it_"+str(count).zfill(4))
+        folder = os.path.join(path, self.NEW_FOLDER_PREFIX + str(count).zfill(4))
         if os.path.isdir(folder):
             logging.warning("Warning, folder %s exists", folder)
         else:
@@ -106,10 +117,6 @@ class GialloZafferano():
             full_text.append(paragraph)
         # print(full_text)
         return "\n".join(full_text)
-
-    @property
-    def get_sections(self):
-        return self.SECTIONS
 
     # def getFileName(title):
     #   """
@@ -165,16 +172,10 @@ class GialloZafferano():
         :return:
         a list with the URLs to every picture
         """
-        prefix = "https://ricette.giallozafferano.it"
-        tag = "picture"
-        classes = ["gz-content-recipe-step-img gz-content-recipe-step-img-full",
-            "gz-content-recipe-step-img gz-content-recipe-step-img-single"
-            ]
-
         paths = []
-        for cl in classes:
-            image_tags = soup.find_all(tag, class_=cl)
-            paths.extend(["/".join([prefix, t.find('img')['data-src']]) for t in image_tags])
+        for cl in self.PICTURE_CLASSES:
+            image_tags = soup.find_all(self.PICTURE_TAG, class_=cl)
+            paths.extend(["/".join([self.PICTURE_PREFIX, t.find('img')['data-src']]) for t in image_tags])
         return paths
 
     def get_presentation(self, soup):
@@ -210,6 +211,10 @@ class GialloZafferano():
         # return "\n".join(title_presentation_lst)
         return "\n".join(presentation_lst)
 
+    @property
+    def get_sections(self):
+        return self.SECTIONS
+
     @staticmethod
     def get_title(soup):
         """
@@ -242,17 +247,21 @@ class GialloZafferano():
         print(dishes_lst)
         return dishes_lst
 
+
 class GialloZafferanoEn(GialloZafferano):
 
-    sections = {"https://www.giallozafferano.com/recipes-list/Appetizers/page2/": 2}
+    SECTIONS = {"https://www.giallozafferano.com/recipes-list/Appetizers/page2/": 2}
 
-    # sections = {"https://www.giallozafferano.com/recipes-list/Appetizers/page2/": 16,
+    # SECTIONS = {"https://www.giallozafferano.com/recipes-list/Appetizers/page2/": 16,
         # "https://www.giallozafferano.com/recipes-list/Appetizers/": 4,
         # "https://www.giallozafferano.com/recipes-list/First-Courses/": 5,
         # "https://www.giallozafferano.com/recipes-list/Main-Courses/": 5,
         # "https://www.giallozafferano.com/recipes-list/Sweets-and-Desserts/": 5,
         # "https://www.giallozafferano.com/recipes-list/Leavened-products/": 3
         # }
+
+    # prefix for the folders that will contain each recipe
+    NEW_FOLDER_PREFIX = "gf_en_"
 
     @staticmethod
     def get_contents(soup):
@@ -298,7 +307,8 @@ class GialloZafferanoEn(GialloZafferano):
         full_ingredients = ["ingredient\tquantity"]
         for t in ingredient_tag:
             ingredient = t.get_text().strip()
-            ingredient = re.sub(r"([^\n\t]+)\s+([^\n\t]*)\s+([^\n\t]*)\s+([^\n\t]*)\s*([^\n\t]*)", r"\1\t\2 \3 \4\t\5",
+            ingredient = re.sub(r"([^\n\t]+)\s+([^\n\t]*)\s+([^\n\t]*)\s+([^\n\t]*)\s*([^\n\t]*)",
+                                r"\1\t\2 \3 \4\t\5",
                                 ingredient)
             ingredient = re.sub(r" (\([^\n\t]+\))", r"\t\1", ingredient)
             ingredient = ingredient.replace("\t to taste", "\tto taste")
@@ -308,20 +318,10 @@ class GialloZafferanoEn(GialloZafferano):
         # append ingredients joined together to have an element with the ingredients for every recipe
         return "\n".join(full_ingredients)
 
-    def get_pictures(soup):
-        """
-        Looks for all the images illustrating the recipe steps
-        :param soup:
-        :return:
-          a list with the URLs to every picture
-        """
-        prefix = "https://www.giallozafferano.com/"
-        tag = "picture"
-        cl = "gz-content-recipe-step-img gz-content-recipe-step-img-full"
 
-        imageTags = soup.find_all(tag, class_=cl)
-        paths = ["/".join([prefix, i.find('img')['data-src']]) for i in imageTags]
-        return paths
+    # Metadata to load the pictures for the recipe steps
+    PICTURE_PREFIX = "https://www.giallozafferano.com/"
+    PICTURE_CLASSES = ["gz-content-recipe-step-img gz-content-recipe-step-img-full"]
 
     def get_presentation(soup):
         """
