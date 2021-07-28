@@ -238,6 +238,8 @@ for url in pages_lst:
     for dish in dishes:
         a_tag = dish.find("a")
         dishes_lst.append(a_tag.get("href"))
+    time.sleep(random.randrange(0, 5))
+
 # print(dishes_lst)
 total_dishes = len(dishes_lst)
 logging.info("Number of dishes found: %i", total_dishes)
