@@ -118,7 +118,7 @@ def get_pictures(soup):
   :return:
     a list with the URLs to every picture
   """
-  prefix = "https://ricette.giallozafferano.it"
+  prefix = "https://www.giallozafferano.com/"
   tag = "picture"
   cl = "gz-content-recipe-step-img gz-content-recipe-step-img-full"
 
