@@ -20,16 +20,17 @@ logger = logging.getLogger()
 class GialloZafferano():
 
     # sections = {"https://www.giallozafferano.it/ricette-cat/": 2}
-    SECTIONS = {"https://www.giallozafferano.it/ricette-cat/": 383,
-            "https://www.giallozafferano.it/ricette-cat/Antipasti/": 75,
-            "https://www.giallozafferano.it/ricette-cat/Primi/": 86,
-            "https://www.giallozafferano.it/ricette-cat/Secondi-piatti/": 66,
-            "https://www.giallozafferano.it/ricette-cat/Contorni/": 19,
-            "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/": 118,
-            "https://www.giallozafferano.it/ricette-cat/Lievitati/": 25,
-            "https://www.giallozafferano.it/ricette-cat/Piatti-Unici/": 30,
-            "https://www.giallozafferano.it/ricette-cat/facili-e-veloci/": 74,
-            "https://www.giallozafferano.it/ricette-cat/Primi/pasta/": 42,
+    SECTIONS = {
+        # "https://www.giallozafferano.it/ricette-cat/": 383,
+        #     "https://www.giallozafferano.it/ricette-cat/Antipasti/": 75,
+        #     "https://www.giallozafferano.it/ricette-cat/Primi/": 86,
+        #     "https://www.giallozafferano.it/ricette-cat/Secondi-piatti/": 66,
+        #     "https://www.giallozafferano.it/ricette-cat/Contorni/": 19,
+        #     "https://www.giallozafferano.it/ricette-cat/Dolci-e-Desserts/": 118,
+        #     "https://www.giallozafferano.it/ricette-cat/Lievitati/": 25,
+        #     "https://www.giallozafferano.it/ricette-cat/Piatti-Unici/": 30,
+        #     "https://www.giallozafferano.it/ricette-cat/facili-e-veloci/": 74,
+        #     "https://www.giallozafferano.it/ricette-cat/Primi/pasta/": 42,
             "https://www.giallozafferano.it/ricette-cat/Antipasti/facili-e-veloci/": 19,
             "https://www.giallozafferano.it/ricette-cat/Lievitati/Pizze-e-focacce/": 10,
             "https://www.giallozafferano.it/ricette-cat/Lievitati/pane/": 9,
@@ -111,10 +112,13 @@ class GialloZafferano():
         # create a list on-the-fly, append cleaned paragraphs and join them to have an element for each recipe
         full_text = []
         for step in contents:
-            p_tag = step.find("p")
-            paragraph = re.sub(r"\s+", r" ", p_tag.get_text())
-            paragraph = re.sub(r"\s([;:\.!\?\\-])", r"\1", paragraph)
-            full_text.append(paragraph)
+            try:
+                p_tag = step.find("p")
+                paragraph = re.sub(r"\s+", r" ", p_tag.get_text())
+                paragraph = re.sub(r"\s([;:\.!\?\\-])", r"\1", paragraph)
+                full_text.append(paragraph)
+            except:
+                logger.warning("Empty paragraph")
         # print(full_text)
         return "\n".join(full_text)
 
@@ -157,7 +161,13 @@ class GialloZafferano():
         return "\n".join(full_ingredients)
 
     def get_pages_list(self):
+        pages_lst = []
         for section in self.SECTIONS:
+            # if int(section[section.rfind("e")+1:]) < 142:
+            #     pass
+            # desde el 142 de         "https://www.giallozafferano.it/ricette-cat/": en el folder giallozafDel142
+            ''
+            # desde el 142
             for i in range(1, self.SECTIONS[section]):
                 page = "".join([section, "page", str(i)])
                 pages_lst.append(page)
@@ -232,7 +242,7 @@ class GialloZafferano():
     def get_dishes_list(pages_lst):
         # for each page, get the section enclosed in the tag h2,
         # class and in that get a, href and append it to dishes_lst
-        sleep_time = 5
+        sleep_time = 3
         dishes_lst = []
         for url in pages_lst:
             logging.info("Identifying recipes from %s", url)
@@ -242,9 +252,12 @@ class GialloZafferano():
             for dish in dishes:
                 a_tag = dish.find("a")
                 dishes_lst.append(a_tag.get("href"))
+                print(url, dishes_lst[-1])
             time.sleep(random.randrange(0, sleep_time))
+
         logging.info("Number of dishes found: %i", len(dishes_lst))
-        print(dishes_lst)
+        # print(dishes_lst)
+        # exit()
         return dishes_lst
 
 
@@ -377,7 +390,7 @@ dishes_lst = gz.get_dishes_list(pages_lst)
 
 total_dishes = len(dishes_lst)
 
-counter = 0
+counter = 6953
 for link in dishes_lst:
     if counter % 10 == 0:
         logging.info("Processing recipe %i/%i", counter, total_dishes)
