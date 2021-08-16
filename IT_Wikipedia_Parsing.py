@@ -25,6 +25,5 @@ print("list of page-articles files:", files[:10])
 
 # Get only partitioned files
 files_to_download = [file[0] for file in files if '.xml-p' in file[0]]
-print("num partitioned files:", len(files_to_download))
-print("list of partitioned files:", files_to_download)
+print(f"There are {len(files_to_download)} files in the list:", files_to_download)
 
