@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 beautifulsoup4 = ">=4.9"
 requests = ">=2.23"
+mwparserfromhell = ">=0.6.3"
 
 [requires]
 python_version = "3.7"
