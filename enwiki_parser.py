@@ -57,9 +57,10 @@ class WikiXmlHandler(xml.sax.handler.ContentHandler):
 
         if name == 'page':
             self._flag = True
-            dumper(self._values['title'], self._values['id'], self._values['text'])
+            self.dish_parser(self._values['title'], self._values['id'], self._values['text'])
             #self._pages.append((self._values['title'], self._values['id'], self._values['text']))
             #print(self._pages[-1])
+            
     def dish_parser(self, title, myid, text):
         texts = []
         if any(cat in x[2] for cat in categories):
