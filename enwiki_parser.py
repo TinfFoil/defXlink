@@ -63,8 +63,8 @@ class WikiXmlHandler(xml.sax.handler.ContentHandler):
             
     def dish_parser(self, title, myid, text):
         texts = []
-        if any(cat in x[2] for cat in self.categories):
-            texts.append(x)
+        if any(cat in text for cat in self.categories):
+            texts.append(text)
             titles = [x[0] for x in texts]
             parsed = [mwparserfromhell.parse(x[2]).strip_code().strip() for x in texts]         
             parsed = [re.sub(r"(== See also == | ==See also== )\n *(.)*", "", el, flags=re.DOTALL) for el in parsed]
