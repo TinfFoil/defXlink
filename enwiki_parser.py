@@ -21,7 +21,7 @@ class WikiXmlHandler(xml.sax.handler.ContentHandler):
         self._pages = []
         self._counter = 0
         self._flag = True
-        self._categories = ["Category:Italian cuisine", "Category:Cuisine of Abruzzo", 
+        self.categories = ["Category:Italian cuisine", "Category:Cuisine of Abruzzo", 
               "Category:Cuisine of Apulia", "Category:Cuisine of Basilicata", "Category:Cuisine of Calabria",
               "Category:Cuisine of Campania", "Category:Cuisine of Emilia-Romagna", "Category:Cuisine of Lazio", 
               "Category:Cuisine of Liguria", "Category:Cuisine of Lombardy", "Category:Cuisine of Marche",
@@ -62,7 +62,7 @@ class WikiXmlHandler(xml.sax.handler.ContentHandler):
             #print(self._pages[-1])
     def dish_parser(self, title, myid, text):
         texts = []
-        if any(cat in text for cat in categories):
+        if any(cat in text for cat in self.categories):
             texts.append(text)
             #titles = [x[0] for x in texts]
             parsed = mwparserfromhell.parse(text).strip_code().strip()         
