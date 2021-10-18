@@ -21,7 +21,7 @@ class WikiXmlHandler(xml.sax.handler.ContentHandler):
         self._pages = []
         self._counter = 0
         self._flag = True
-        self.categories = ["Category:Italian cuisine", "Category:Cuisine of Abruzzo", 
+        self._categories = ["Category:Italian cuisine", "Category:Cuisine of Abruzzo", 
               "Category:Cuisine of Apulia", "Category:Cuisine of Basilicata", "Category:Cuisine of Calabria",
               "Category:Cuisine of Campania", "Category:Cuisine of Emilia-Romagna", "Category:Cuisine of Lazio", 
               "Category:Cuisine of Liguria", "Category:Cuisine of Lombardy", "Category:Cuisine of Marche",
@@ -57,7 +57,7 @@ class WikiXmlHandler(xml.sax.handler.ContentHandler):
 
         if name == 'page':
             self._flag = True
-            self.dish_parser(self._values['title'], self._values['id'], self._values['text'])
+            self._dish_parser(self._values['title'], self._values['id'], self._values['text'])
             #self._pages.append((self._values['title'], self._values['id'], self._values['text']))
             #print(self._pages[-1])
     def dish_parser(self, title, myid, text):
