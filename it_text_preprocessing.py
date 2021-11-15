@@ -66,8 +66,10 @@ string_page = {}
 for n in range(4, 0, -1):
     candidates = get_candidates(doc, n)
     for tok in candidates:
-        # Ignore stopwords
+        # Ignore stopwords and digits
         if any([str(tok).casefold()==stopword for stopword in stopwords]):
+            continue
+        if str(tok).isdigit():
             continue
         # Query Wikipedia API to find if page exists and is not a pagina di disambiguazione
         # Clean Wikipedia API object
@@ -116,9 +118,3 @@ for key in url_dict:
         tokens = tokens.replace(f" {key}",f" <a href\"{url_dict[key]}\">{key}</a>")
 tokens = re.sub(r" (\.|\;|\,|\:|\!|\?|\)|\]|\}|\')", r'\1', tokens)
 print(tokens)
-"""
-1) Togli i numeri
-2) Correggi formattazione spazi nell'output html
-"""
-
-
