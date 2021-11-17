@@ -11,13 +11,14 @@ path = Path("/home/jupyter-margherita/corpora/wiki-it-food/")
 
 set_itwiki = set()
 for doc in path.iterdir():
+    #print(doc)
     if doc.is_file():
         with open(doc) as f:
             mydoc = f.readline()
             mydoc = mydoc.replace("\n", "")
             set_itwiki.add(mydoc.casefold())
-            #print(len(set_itwiki))
-            #print(set_itwiki)
+#print(len(set_itwiki))
+#print(set_itwiki)
 
 def preprocessing(doc):
     """
@@ -63,11 +64,7 @@ def get_substring(ngram_list):
             sorted_ngrams.append(ngram)
     return sorted_ngrams
 
-sentence = '''Per preparare le crepe dolci e salate iniziate rompendo le uova in una ciotola dai bordi alti [1] mescolate con una forchetta e unite il latte [2]. Mescolate accuratamente per amalgamare questi due ingredienti [3].
-Posizionate un colino sul recipiente e poi setacciate la farina nella ciotola [4], (per comodità potete anche aggiungerla in due tempi e mescolare così da evitare la formazione di grumi). Poi con le fruste mescolate energicamente per assorbire la farina [5]. Continuate a mescolare fino ad ottenere un composto omogeneo, vellutato e privo di grumi [6].
-A questo punto coprite la ciotola con della pellicola alimentare trasparente e lasciate riposare per almeno 30 minuti in frigorifero: questa operazione serve a far assorbire eventuali grumi [7]. Trascorso il tempo mescolate l’impasto per farlo rinvenire [8] e poi scaldate una crepiera (o in alternativa una padella antiaderente dal diametro tra i 18 ed i 22 cm) ed ungetela con una noce di burro. Una volta a temperatura versate un mestolo di impasto sufficiente a ricoprire la superficie della padella: potete aiutarvi con l'apposito stendi pastella per crepe oppure ruotare la padella fino a distribuire il composto uniformemente (fate attenzione a non spanderlo tutto sui bordi per evitare che al centro non rimanga pastella sufficiente a creare una crepe dalla superficie uniforme); si consiglia di eseguire queste operazioni molto in fretta, poiché la pastella cuocerà rapidamente. [9]
-Trascorso circa 1 minuto a fuoco medio-basso, dovreste notare una leggera doratura, i bordi tenderanno a staccarsi perciò potrete girare la prima crepe aiutandovi con una paletta [10]. Cuocete anche l'altro lato per 1 minuto circa, aspettando che prenda colore [11]. Una volta cotta la prima, strasferitela su un piatto da portata o su di un tagliere. Ripetete questa operazione fino a finire l’impasto, dovreste ottenere così 15 crepe del diametro di 20 cm: impilate ogni crepe una sopra l’altra così resteranno morbide. Ecco pronte le vostre crepe dolci e salate, non vi resta che farcirle [12]!'''
-
+sentence = "fiori di zucca in pastella"
 # CONSTANTS
 language = "it"
 # INVOCATION
@@ -110,15 +107,12 @@ for key in final_dict:
     if any([key==ngram for ngram in sorted_ngrams]):
         cleaned_final_dict[key] = final_dict[key]
 
+# dict with string (aka mention) as key and url as value
 url_dict = {final_dict[found]:f"https://it.wikipedia.org/wiki/{str(found.replace(' ', '_'))}" for found in cleaned_final_dict}
 
 print(url_dict)
 
-text = '''Per preparare le crepe dolci e salate iniziate rompendo le uova in una ciotola dai bordi alti [1] mescolate con una forchetta e unite il latte [2]. Mescolate accuratamente per amalgamare questi due ingredienti [3].
-Posizionate un colino sul recipiente e poi setacciate la farina nella ciotola [4], (per comodità potete anche aggiungerla in due tempi e mescolare così da evitare la formazione di grumi). Poi con le fruste mescolate energicamente per assorbire la farina [5]. Continuate a mescolare fino ad ottenere un composto omogeneo, vellutato e privo di grumi [6].
-A questo punto coprite la ciotola con della pellicola alimentare trasparente e lasciate riposare per almeno 30 minuti in frigorifero: questa operazione serve a far assorbire eventuali grumi [7]. Trascorso il tempo mescolate l’impasto per farlo rinvenire [8] e poi scaldate una crepiera (o in alternativa una padella antiaderente dal diametro tra i 18 ed i 22 cm) ed ungetela con una noce di burro. Una volta a temperatura versate un mestolo di impasto sufficiente a ricoprire la superficie della padella: potete aiutarvi con l'apposito stendi pastella per crepe oppure ruotare la padella fino a distribuire il composto uniformemente (fate attenzione a non spanderlo tutto sui bordi per evitare che al centro non rimanga pastella sufficiente a creare una crepe dalla superficie uniforme); si consiglia di eseguire queste operazioni molto in fretta, poiché la pastella cuocerà rapidamente. [9]
-Trascorso circa 1 minuto a fuoco medio-basso, dovreste notare una leggera doratura, i bordi tenderanno a staccarsi perciò potrete girare la prima crepe aiutandovi con una paletta [10]. Cuocete anche l'altro lato per 1 minuto circa, aspettando che prenda colore [11]. Una volta cotta la prima, strasferitela su un piatto da portata o su di un tagliere. Ripetete questa operazione fino a finire l’impasto, dovreste ottenere così 15 crepe del diametro di 20 cm: impilate ogni crepe una sopra l’altra così resteranno morbide. Ecco pronte le vostre crepe dolci e salate, non vi resta che farcirle [12]!'''
-
+text = "Fiori di zucca in pastella"
 # Preprocessing
 text, stopwords = preprocessing(text)
 tokens = []
@@ -129,15 +123,19 @@ for n in text:
 tokens = ' '.join(tokens)
 print(list(url_dict.keys()))
 for key in url_dict:
+    # Remove space if dealing with titles
     if f" {key}" in f" {tokens}":
-        tokens = tokens.replace(f" {key}",f' <a href\"{url_dict[key]}\">{key}</a>')
-tokens = re.sub(r" (\.|\;|\,|\:|\!|\?|\)|\]|\}|\')", r'\1', tokens)
-print(tokens)
+        tokens = f" {tokens}".replace(f" {key}",f' <a href="{url_dict[key]}">{key}</a>')
+# Remove whitespace before punctuation marks
+html = re.sub(r" (\.|\;|\,|\:|\!|\?|\)|\]|\}|\')", r'\1', tokens)
+print(html)
 
-# Check if mention belongs to food or other class by iterating over set of all Wikipedia titles
+# food or other class
 # Iterate over keys in dict and look for exact string match of the key inside the set of all wiki titles
 for key in cleaned_final_dict.keys():
-        if any([key == title for title in set_itwiki]):
-             html = html.replace(f' <a href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>', f' <a class="food" href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>')
-        else:
-             html = html.replace(f' <a href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>', f' <a class="other" href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>')
+    if any([key == title for title in set_itwiki]):
+        html = html.replace(f' <a href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>', f' <a class="food" href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>')
+    else:
+        html = html.replace(f' <a href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>', f' <a class="other" href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>')
+
+print(html)
