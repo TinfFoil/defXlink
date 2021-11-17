@@ -4,6 +4,21 @@ import re
 import wikipediaapi as wa
 from spacy.tokens import Doc
 
+# Create set of wiki titles
+
+from pathlib import Path
+path = Path("/home/jupyter-margherita/corpora/wiki-it-food/")
+
+set_itwiki = set()
+for doc in path.iterdir():
+    if doc.is_file():
+        with open(doc) as f:
+            mydoc = f.readline()
+            mydoc = mydoc.replace("\n", "")
+            set_itwiki.add(mydoc.casefold())
+            #print(len(set_itwiki))
+            #print(set_itwiki)
+
 def preprocessing(doc):
     """
     invoke spacy IT model and pass the text in the model
@@ -114,7 +129,15 @@ for n in text:
 tokens = ' '.join(tokens)
 print(list(url_dict.keys()))
 for key in url_dict:
-    if f" {key}" in tokens:
-        tokens = tokens.replace(f" {key}",f" <a href\"{url_dict[key]}\">{key}</a>")
+    if f" {key}" in f" {tokens}":
+        tokens = tokens.replace(f" {key}",f' <a href\"{url_dict[key]}\">{key}</a>')
 tokens = re.sub(r" (\.|\;|\,|\:|\!|\?|\)|\]|\}|\')", r'\1', tokens)
 print(tokens)
+
+# Check if mention belongs to food or other class by iterating over set of all Wikipedia titles
+# Iterate over keys in dict and look for exact string match of the key inside the set of all wiki titles
+for key in cleaned_final_dict.keys():
+        if any([key == title for title in set_itwiki]):
+             html = html.replace(f' <a href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>', f' <a class="food" href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>')
+        else:
+             html = html.replace(f' <a href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>', f' <a class="other" href="{url_dict[cleaned_final_dict[key]]}">{cleaned_final_dict[key]}</a>')
