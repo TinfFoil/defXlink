@@ -31,7 +31,9 @@ class WikiXmlHandler(xml.sax.handler.ContentHandler):
               "Category:Cuisine of Aosta Valley", "Category:Dairy dishes", "Category:Egg dishes", 
               "Category:Flower dishes", "Category:Fruit dishes", "Category:Ginger dishes", "Category:Grain dishes", 
               "Category:Meat dishes", "Category:Mushroom dishes", "Category:Noodle dishes", "Category:Nut dishes", 
-              "Category:Pasta dishes", "Category:Tofu dishes", "Category:Tuber dishes", "Category:Vegetable dishes"]
+              "Category:Pasta dishes", "Category:Tofu dishes", "Category:Tuber dishes", "Category:Vegetable dishes", "Category:Spaghetti dishes",
+              "Category:Neapolitan cuisine", "Category:Potato dishes", "Category:Fish dishes", "Category:Italian desserts",
+              "Category:Appetizers", "Category:Desserts"]
 
     def characters(self, content):
         """Characters between opening and closing tags"""
