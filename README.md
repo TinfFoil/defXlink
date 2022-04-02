@@ -15,6 +15,7 @@ Some lines of code that may turn out useful:
 - 📂 `data_path`: the path where the Wikipedia dump is stored;
 - `self._categories`: Wikipedia articles are connected through the categories in the category tree. If you want a corpus on food, you look for food categories, if you want a corpus on animals, you look for animal categories, and so on. ⚠️ If you don't need the categories and want to parse the entire dump, comment this line 24 as well as line 67;
 - 📝 `parsed`: lines 71-74 use the library `mwparserfromhell` to clean the XML file by turning it into a string and removing the unnecessary information with regex. ⚠️ If you want to keep the entire article, comment these lines.
+If you have troubles understanding this nonsense, [Will Koehrsen](https://github.com/WillKoehrsen/wikipedia-data-science/blob/master/notebooks/Downloading%20and%20Parsing%20Wikipedia%20Articles.ipynb) has a much better explanation of how to parse Wikipedia (though he focuses on article templates and not categories).
 
 ## Definitional Context Extraction
 
