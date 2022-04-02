@@ -34,5 +34,6 @@ The folder `defXlink/BERT/definition_extractor/` contains four files:
 
 For both cases (top score and first 2 sentences), the implementation is the same:
 - 📂 `path_to_text = input("Enter the path to the text:\n")`: prompts you to give the path where the Wikipedia article is stored;
-- The Wikipedia article has to be sentencized, i.e. tokenized in sentences. We use `SpaCy` for the English articles and `sentence_splitter` for Italian articles
+- The Wikipedia article has to be sentencized, i.e. tokenized in sentences. We use `SpaCy` for the English articles and `sentence_splitter` for Italian articles;
+- Let the model do the work for you. If you are curious, most of the code is freely available on [the Huggingface website](https://huggingface.co/course/chapter3/3?fw=pt);
 - ✏️ You can modify the final lines of the code according to the output you wish to get from the model.
