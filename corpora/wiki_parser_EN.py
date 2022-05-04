@@ -15,44 +15,60 @@ import argparse
 class WikiXmlHandler(xml.sax.handler.ContentHandler):
     """Content handler for Wiki XML data using SAX"""
 
-    def __init__(self, dump_path, target_path=".", all_categories=False):
+    def __init__(self, dump_path, target_path=".", all_categories=True, lang="en"):
         xml.sax.handler.ContentHandler.__init__(self)
         self._buffer = None
-        self._values = {}
-        self._current_tag = None
-        self._pages = []
         self._counter = 0
+        self._current_tag = None
         self._flag = True
+        self._pages = []
         self._target_path = target_path
-        if all_categories:
-            self._categories = [
-            "Category:Italian cuisine", "Category:Cuisine of Abruzzo",
-            "Category:Cuisine of Apulia", "Category:Cuisine of Basilicata",
-            "Category:Cuisine of Calabria", "Category:Cuisine of Campania",
-            "Category:Cuisine of Emilia-Romagna", "Category:Cuisine of Lazio",
-            "Category:Cuisine of Liguria", "Category:Cuisine of Lombardy",
-            "Category:Cuisine of Marche", "Category:Cuisine of Molise",
-            "Category:Cuisine of Piedmond", "Category:Cuisine of Sardinia",
-            "Category:Cuisine of Sicily", "Category:Cuisine of South Tyrol",
-            "Category:Cuisine of Tuscany", "Category:Cuisine of Umbria",
-            "Category:Cuisine of Veneto", "Category:Cuisine of Aosta Valley",
-            "Category:Dairy dishes", "Category:Egg dishes",
-            "Category:Flower dishes", "Category:Fruit dishes",
-            "Category:Ginger dishes", "Category:Grain dishes",
-            "Category:Meat dishes", "Category:Mushroom dishes",
-            "Category:Noodle dishes", "Category:Nut dishes",
-            "Category:Pasta dishes", "Category:Tofu dishes",
-            "Category:Tuber dishes", "Category:Vegetable dishes",
-            "Category:Spaghetti dishes", "Category:Neapolitan cuisine",
-            "Category:Potato dishes", "Category:Fish dishes",
-            "Category:Italian desserts", "Category:Appetizers",
-            "Category:Desserts"
-            ]
+        self._values = {}
+        # self._language = ""
+        # self.language(lang)
+        languages = ["en", "it"]
+        if lang in languages:
+            self._language = lang
         else:
-            self._categories = []
+            raise ValueError("Dunno how to handle other languages than", " or ".join(languages))
 
-    def reset_default_values(self):
-        self._categories = WikiXmlHandler._categories
+        if all_categories:
+            self._categories = []
+        else:
+            if self._language == "it":
+                self.categories = [
+                    "Categoria:Antipasti", "Categoria:Contorni",
+                    "Categoria:Dolci", "Categoria:Piatti",
+                    "Categoria:Primi piatti", "Categoria:Secondi piatti"
+                ]
+
+            else:
+                self._categories = [
+                    "Category:Italian cuisine", "Category:Cuisine of Abruzzo",
+                    "Category:Cuisine of Apulia", "Category:Cuisine of Basilicata",
+                    "Category:Cuisine of Calabria", "Category:Cuisine of Campania",
+                    "Category:Cuisine of Emilia-Romagna", "Category:Cuisine of Lazio",
+                    "Category:Cuisine of Liguria", "Category:Cuisine of Lombardy",
+                    "Category:Cuisine of Marche", "Category:Cuisine of Molise",
+                    "Category:Cuisine of Piedmond", "Category:Cuisine of Sardinia",
+                    "Category:Cuisine of Sicily", "Category:Cuisine of South Tyrol",
+                    "Category:Cuisine of Tuscany", "Category:Cuisine of Umbria",
+                    "Category:Cuisine of Veneto", "Category:Cuisine of Aosta Valley",
+                    "Category:Dairy dishes", "Category:Egg dishes",
+                    "Category:Flower dishes", "Category:Fruit dishes",
+                    "Category:Ginger dishes", "Category:Grain dishes",
+                    "Category:Meat dishes", "Category:Mushroom dishes",
+                    "Category:Noodle dishes", "Category:Nut dishes",
+                    "Category:Pasta dishes", "Category:Tofu dishes",
+                    "Category:Tuber dishes", "Category:Vegetable dishes",
+                    "Category:Spaghetti dishes", "Category:Neapolitan cuisine",
+                    "Category:Potato dishes", "Category:Fish dishes",
+                    "Category:Italian desserts", "Category:Appetizers",
+                    "Category:Desserts"
+                ]
+
+    # def reset_default_values(self):
+    #     self._categories = WikiXmlHandler._categories
 
     @property
     def categories(self):
@@ -61,9 +77,23 @@ class WikiXmlHandler(xml.sax.handler.ContentHandler):
     @categories.setter
     def categories(self, value):
         """
-        Define a new set of catogories
+        Define a new set of categories
         """
         self._categories = value
+
+    @property
+    def language(self):
+        return self._language
+
+    @language.setter
+    def language(self, value):
+        languages = ["en", "it"]
+        if value in languages:
+            self._language = value
+            return self._language
+        else:
+            raise ValueError("Dunno how to handle other languages than", " or ".join(languages))
+
 
     def characters(self, content):
         """Characters between opening and closing tags"""
