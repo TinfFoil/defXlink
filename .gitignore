@@ -1,0 +1,6 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/BERT/definition_extractor/wikiDefinition.log
+/BERT/definition_extractor/wikiDefinition_old.log
