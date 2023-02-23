@@ -16,7 +16,7 @@ sentences = []
 path_to_text = input("Enter the path to the text:\n")
 
 #open file, sentencize and create list of sentences
-with open(path_to_text, 'r') as f:
+with open(path_to_text, 'r', encoding='utf-8') as f:
     f = f.read()
     doc = nlp(f)
     sentences = [str(sent) for sent in list(doc.sents)]
@@ -24,7 +24,8 @@ with open(path_to_text, 'r') as f:
 checkpoint = 'bert-base-cased'
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
-model = AutoModelForSequenceClassification.from_pretrained('/home/mmartinelli/huggingface/saved_model/')
+# model = AutoModelForSequenceClassification.from_pretrained('/home/mmartinelli/huggingface/saved_model/')
+model = AutoModelForSequenceClassification.from_pretrained('\\users\\fede9\\MTData\\saved_model_EN\\')
 
 pipe = TextClassificationPipeline(model=model, tokenizer=tokenizer, return_all_scores=True)
 
