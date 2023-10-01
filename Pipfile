@@ -1,14 +1,12 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
+name = "pypi"
+
+[packages]
+datasets = "*"
 
 [dev-packages]
 
-[packages]
-beautifulsoup4 = ">=4.9"
-requests = ">=2.23"
-mwparserfromhell = ">=0.6.3"
-
 [requires]
-python_version = "3.7"
+python_version = "3.11"

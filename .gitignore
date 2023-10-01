@@ -3,4 +3,6 @@
 ################################################################################
 
 /BERT/definition_extractor/*.log
+/BERT/definition_extractor/*.csv
+/BERT/definition_extractor/.vs
 
