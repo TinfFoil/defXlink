@@ -8,6 +8,7 @@
 #       - language param is used to query DB and to load the proper model. We could pass an optional param to filter for specific ID or Name (better)
 #       - consider an optional param to 'force update' to find updated data file and re-extract definitions 
 
+from importlib import metadata
 from unittest import skip
 from datasets import load_dataset, Dataset, DatasetDict
 from transformers import AutoTokenizer, TextClassificationPipeline, DataCollatorWithPadding, AutoModelForSequenceClassification
@@ -27,6 +28,7 @@ import pickle
 import csv
 import mysql.connector
 from os import environ as env
+import argparse
 
 
 class Application:
@@ -52,15 +54,11 @@ class Application:
         return bool(not s or s.isspace())
 
 
-    def connect_to_db(self):
-        host="localhost"
-        user="root" #"notrans"
-        password="federoot" # "5p2arGc8xf3EGHfb"  # "federoot"
-        database="notrans"
-        #host=env['HOST'],
-        #user=env['DBUSER'],
-        #password=env['DBPASSWORD'],
-        #database=env['DB']
+    def connect_to_db(self):        
+        host=env['HOST'],
+        user=env['DBUSER'],
+        password=env['DBPASSWORD'],
+        database=env['DB']
         mydb = mysql.connector.connect(          
           host=host,
           user=user,
@@ -77,7 +75,8 @@ class Application:
             with open(pickle_name, 'rb') as fp:
                 metadata = pickle.load(fp)
             basepath = os.path.join(path_to_folder, self.lang)
-            files = [os.path.join(basepath,str(tple[0])+".txt") for tple in metadata]
+            #files = [os.path.join(basepath,str(tple[0])+".txt") for tple in metadata]
+            files = [str(tple[0]) for tple in metadata]
         else:
             files = glob.glob(glob.escape(path_to_folder) + "/*.txt")
         return files
@@ -88,8 +87,7 @@ class Application:
             writer = csv.writer(output_csv, delimiter=",")
             for data in tuples:
                 # tuple is: file_id, highest_score[0], second_highest_def, title
-                # write title, def1, def2
-                writer.writerow([data[3].rstrip(),data[1].rstrip(),data[2].rstrip()])
+                writer.writerow([data[0].rstrip(),data[1].rstrip(),data[2].rstrip(),data[3].rstrip()])
 
 
     def get_filenames_from_db(self, lang):
@@ -130,15 +128,24 @@ class Application:
 
     def MainLoop( self ):  
         print("This program will extract definitions from text files (supposedly from wikipedia), and store results in a db or csv file.")
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--path', required=False, default="data", type=str, metavar='PATH', help='The target path (where data files to analyze are located)')
+        parser.add_argument('--lan', required=False, default="it", type=str, metavar='LANGUAGE', help='The language of the model to use (e.g. en, it)')
+        parser.add_argument('--pickle', required=False, default="", type=str, metavar='PICKLE', help='Pickle name that contains metadata about files. Leave blank to use local database')
+        
+        args = parser.parse_args()
+        path_to_folder = args.path
+        self.lang = args.lan
+        pickle_name_raw = args.pickle
 
         #choose the language in which we have data:
-        lang = input("enter the language code for the data to analyze: (supported: en, it)\n")
-        self.lang = lang
+        #lang = input("enter the language code for the data to analyze: (supported: en, it)\n")
+        #self.lang = lang
         usedb = False
         single_file = False
         
         #choose a path to get list of files
-        path_to_folder = input("Enter the path to the file(s) to analyze:\n")
+        #path_to_folder = input("Enter the path to the file(s) to analyze:\n")
         if os.path.exists(path_to_folder) == False:
             sys.exit("sorry, the specified folder does not exist.")
 
@@ -147,15 +154,15 @@ class Application:
             files_to_process = [path_to_folder]
         else:
             # choose a pickle with list of files
-            pickle_name_raw = input("Enter the pickle name (without extension) that contains metadata about files: (leave blank to use local DB)\n")
+            # pickle_name_raw = input("Enter the pickle name (without extension) that contains metadata about files: (leave blank to use local DB)\n")
             if pickle_name_raw == None or pickle_name_raw.strip() == '':
                 usedb = True
-                files_to_process = self.get_filenames_from_db(lang)
+                files_to_process = self.get_filenames_from_db(self.lang)
             else:
                 pickle_name = os.path.join(path_to_folder,pickle_name_raw+".pickle")
                 files_to_process = self.get_filenames_from_pickle(path_to_folder, pickle_name)
 
-        if lang == 'en':
+        if self.lang == 'en':
             nlp = spacy.load("en_core_web_md")
             nlp.add_pipe('sentencizer', before='parser')
 
@@ -167,7 +174,7 @@ class Application:
             model = AutoModelForSequenceClassification.from_pretrained('\\users\\fede9\\MTData\\saved_model_EN\\')
 
             pipe = TextClassificationPipeline(model=model, tokenizer=tokenizer, return_all_scores=True)
-        elif lang == 'it':
+        elif self.lang == 'it':
             nlp = spacy.load("it_core_news_md")
             nlp.add_pipe('sentencizer', before='parser')
 
@@ -180,13 +187,14 @@ class Application:
             #   scores = predictions[idx][1]['score']
             #pipe = TextClassificationPipeline(model=model, tokenizer=tokenizer, top_k=None)
             pipe = TextClassificationPipeline(model=model, tokenizer=tokenizer, return_all_scores=True)
-            
+        else:
+            sys.exit("sorry, we don't have a model for language %s", self.lang)
 
         for batch in self.batch(files_to_process, 5):
             tuples = []        
             for file_id in batch:
                 #open file, sentencize and create list of sentences
-                sub_folder = os.path.join(path_to_folder, lang)
+                sub_folder = os.path.join(path_to_folder, self.lang)
                 if file_id.endswith('txt'):
                     path_to_text = os.path.join(sub_folder, str(file_id))
                 else:
@@ -236,8 +244,6 @@ class Application:
             
                 data = (file_id, highest_score[0], second_highest_def, title)
                 tuples.append(data)            
-                if self.terminated:
-                    break
             #end for
             if usedb:
                 self.write_tuples_to_db(tuples)
@@ -245,6 +251,8 @@ class Application:
                 print('Item: {}, Definition: {}, Second Def:{}'.format(data[3],data[1],data[2]))
             else: # write to csv file
                 self.write_tuples_to_csv(tuples, pickle_name_raw)
+            if self.terminated:
+                    break
         #end batch
 
 
